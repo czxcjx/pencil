@@ -27,12 +27,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="menuOpen_Recnt">
-     <property name="title">
-      <string>Open recent ..</string>
-     </property>
-     <addaction name="separator"/>
-    </widget>
     <widget class="QMenu" name="menuImport">
      <property name="title">
       <string>Import</string>
@@ -60,7 +54,6 @@
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
-    <addaction name="menuOpen_Recnt"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
@@ -129,8 +122,9 @@
     <addaction name="separator"/>
     <addaction name="actionNext_Frame"/>
     <addaction name="actionPrevious_Frame"/>
+    <addaction name="actionNext_Keyframe"/>
+    <addaction name="actionPrev_Keyframe"/>
     <addaction name="separator"/>
-    <addaction name="actionExtend_Frame"/>
     <addaction name="actionAdd_Frame"/>
     <addaction name="actionDuplicate_Frame"/>
     <addaction name="actionRemove_Frame"/>
@@ -151,6 +145,8 @@
     <addaction name="actionBucket"/>
     <addaction name="actionEyedropper"/>
     <addaction name="actionEraser"/>
+    <addaction name="separator"/>
+    <addaction name="actionResetToolsDefault"/>
    </widget>
    <widget class="QMenu" name="menuLayer">
     <property name="title">
@@ -398,7 +394,7 @@
   </action>
   <action name="actionReset_View">
    <property name="text">
-    <string>Reset View</string>
+    <string>Reset Zoom/Rotate</string>
    </property>
   </action>
   <action name="actionHorizontal_Flip">
@@ -681,6 +677,40 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionResetToolsDefault">
+   <property name="text">
+    <string>Reset to default</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset to default</string>
+   </property>
+  </action>
+  <action name="actionNext_Keyframe">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/next.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Next_Keyframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Next Keyframe</string>
+   </property>
+  </action>
+  <action name="actionPrev_Keyframe">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/prev.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Prev_Keyframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Previous keyframe</string>
    </property>
   </action>
  </widget>

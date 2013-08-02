@@ -13,10 +13,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 */
-#include <QtGui>
+
 #include <QDomDocument>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 #include "object.h"
 #include "layer.h"
@@ -52,21 +53,29 @@ Object::~Object()
 QDomElement Object::createDomElement(QDomDocument& doc)
 {
     QDomElement tag = doc.createElement("object");
+    qDebug("  Create Object Node!");
 
-    for (int i=0; i < getLayerCount(); i++)
+    int layerCount = getLayerCount();
+    qDebug("  Total LayerCount = %d", layerCount);
+    for (int i = 0; i < getLayerCount(); i++)
     {
         Layer* layer = getLayer(i);
         QDomElement layerTag = layer->createDomElement(doc);
         tag.appendChild(layerTag);
+        qDebug("  Append Layer %d", i);
     }
     return tag;
 }
 
 bool Object::loadDomElement(QDomElement docElem, QString filePath)
 {
-    if (docElem.isNull()) return false;
+    if (docElem.isNull())
+    {
+        return false;
+    }
     int layerNumber = -1;
     QDomNode tag = docElem.firstChild();
+    
     bool someRelevantData = false;
     while (!tag.isNull())
     {
@@ -109,6 +118,7 @@ bool Object::loadDomElement(QDomElement docElem, QString filePath)
         }
         tag = tag.nextSibling();
     }
+    qDebug() << "  Load object finish.  Layer Count=" << getLayerCount();
     return someRelevantData;
 }
 
@@ -160,38 +170,45 @@ bool Object::write(QString filePath)
     return true;
 }
 
-void Object::addNewBitmapLayer()
+LayerBitmap *Object::addNewBitmapLayer()
 {
     LayerBitmap* layerBitmap = new LayerBitmap(this);
     layerBitmap->id = 1+getMaxID();
     layer.append( layerBitmap );
     connect( layerBitmap, SIGNAL(imageAdded(int)), this, SIGNAL(imageAdded(int)) );
     connect( layerBitmap, SIGNAL(imageRemoved(int)), this, SLOT(imageCheck(int)) );
+
+    return layerBitmap;
 }
 
-void Object::addNewVectorLayer()
+LayerVector *Object::addNewVectorLayer()
 {
     LayerVector* layerVector = new LayerVector(this);
     layerVector->id = 1+getMaxID();
     layer.append( layerVector );
     connect( layerVector, SIGNAL(imageAdded(int)), this, SIGNAL(imageAdded(int)) );
     connect( layerVector, SIGNAL(imageRemoved(int)), this, SLOT(imageCheck(int)) );
+
+    return layerVector;
 }
 
-void Object::addNewSoundLayer()
+LayerSound *Object::addNewSoundLayer()
 {
     LayerSound* layerSound = new LayerSound(this);
     layerSound->id = 1+getMaxID();
     layer.append( layerSound );
+    return layerSound;
 }
 
-void Object::addNewCameraLayer()
+LayerCamera *Object::addNewCameraLayer()
 {
     LayerCamera* layerCamera = new LayerCamera(this);
     layerCamera->id = 1+getMaxID();
     layer.append( layerCamera );
     connect( layerCamera, SIGNAL(imageAdded(int,int)), this, SIGNAL(imageAdded(int,int)) );
     connect( layerCamera, SIGNAL(imageRemoved(int)), this, SLOT(imageCheck(int)) );
+
+    return layerCamera;
 }
 
 int Object::getMaxID()
@@ -331,7 +348,7 @@ bool Object::exportPalette(QString filePath)
     QDomDocument doc("PencilPalette");
     QDomElement root = doc.createElement("palette");
     doc.appendChild(root);
-    for(int i=0; i < myPalette.size(); i++)
+    for (int i=0; i < myPalette.size(); i++)
     {
         QDomElement tag = doc.createElement("Colour");
         tag.setAttribute("name", myPalette.at(i).name);
@@ -460,11 +477,11 @@ void Object::paintImage(QPainter& painter, int frameNumber, bool background, qre
                 /*BitmapImage* bitmapImage = layerBitmap->getLastBitmapImageAtFrame(frameNumber, 0);
                 // TO BE FIXED
                 if (bitmapImage != NULL) {
-                	if ( mirror) {
-                		painter.drawImage(target, (*(bitmapImage->image)).mirrored(true, false), source);
-                	} else {
-                		painter.drawImage(target, *(bitmapImage->image), source);
-                	}
+                    if ( mirror) {
+                        painter.drawImage(target, (*(bitmapImage->image)).mirrored(true, false), source);
+                    } else {
+                        painter.drawImage(target, *(bitmapImage->image), source);
+                    }
                 }*/
                 layerBitmap->getLastBitmapImageAtFrame(frameNumber, 0)->paintImage(painter);
             }
@@ -478,7 +495,7 @@ void Object::paintImage(QPainter& painter, int frameNumber, bool background, qre
     }
 }
 
-void Object::exportFrames(int frameStart, int frameEnd, QMatrix view, Layer* currentLayer, QSize exportSize, QString filePath, const char* format, int quality, bool background, bool antialiasing, int gradients, QProgressDialog* progress=NULL, int progressMax=50)
+bool Object::exportFrames(int frameStart, int frameEnd, QMatrix view, Layer* currentLayer, QSize exportSize, QString filePath, const char* format, int quality, bool background, bool antialiasing, int gradients, QProgressDialog* progress=NULL, int progressMax=50)
 {
 
     QSettings settings("Pencil","Pencil");
@@ -491,7 +508,7 @@ void Object::exportFrames(int frameStart, int frameEnd, QMatrix view, Layer* cur
         format = "PNG";
         extension = ".png";
     }
-    if ( formatStr == "JPG" || formatStr == "jpg" || formatStr == "JPEG")
+    if ( formatStr == "JPG" || formatStr == "jpg" || formatStr == "JPEG" || formatStr == "jpeg")
     {
         format = "JPG";
         extension = ".jpg";
@@ -530,6 +547,9 @@ void Object::exportFrames(int frameStart, int frameEnd, QMatrix view, Layer* cur
         while ( frameNumberString.length() < 4) frameNumberString.prepend("0");
         tempImage.save(filePath+frameNumberString+extension, format, quality);
     }
+
+    // XXX no error handling done yet
+    return true;
 }
 
 
@@ -545,7 +565,7 @@ void convertNFrames(int fps,int exportFps,int* frameRepeat,int* frameReminder,in
 
 
 
-void Object::exportFrames1(int frameStart, int frameEnd, QMatrix view, Layer* currentLayer, QSize exportSize, QString filePath, const char* format, int quality, bool background, bool antialiasing, int gradients, QProgressDialog* progress, int progressMax, int fps, int exportFps)
+bool Object::exportFrames1(int frameStart, int frameEnd, QMatrix view, Layer* currentLayer, QSize exportSize, QString filePath, const char* format, int quality, bool background, bool antialiasing, int gradients, QProgressDialog* progress, int progressMax, int fps, int exportFps)
 {
 
     int frameRepeat;
@@ -651,11 +671,14 @@ void Object::exportFrames1(int frameStart, int frameEnd, QMatrix view, Layer* cu
             frameSkipEvery1 = frameSkipEvery;
         }
     }
+
+    // XXX no error handling yet
+    return true;
 }
 
 
 
-void Object::exportX(int frameStart, int frameEnd, QMatrix view, QSize exportSize, QString filePath, bool antialiasing, int gradients)
+bool Object::exportX(int frameStart, int frameEnd, QMatrix view, QSize exportSize, QString filePath, bool antialiasing, int gradients)
 {
     QSettings settings("Pencil","Pencil");
     qreal curveOpacity = (100-settings.value("curveOpacity").toInt())/100.0; // default value is 1.0
@@ -689,12 +712,16 @@ void Object::exportX(int frameStart, int frameEnd, QMatrix view, QSize exportSiz
         {
             filePath.chop(4);
         }
-        xImg.save(filePath+QString::number(page)+".jpg", "JPG", 60);
+        if (!xImg.save(filePath+QString::number(page)+".jpg", "JPG", 60)) {
+            return false;
+        }
         page++;
     }
+
+    return true;
 }
 
-void Object::exportIm(int frameStart, int frameEnd, QMatrix view, QSize exportSize, QString filePath, bool antialiasing, int gradients)
+bool Object::exportIm(int frameStart, int frameEnd, QMatrix view, QSize exportSize, QString filePath, bool antialiasing, int gradients)
 {
     Q_UNUSED(frameEnd);
     QSettings settings("Pencil","Pencil");
@@ -704,10 +731,10 @@ void Object::exportIm(int frameStart, int frameEnd, QMatrix view, QSize exportSi
     painter.fillRect(exported.rect(), Qt::white);
     painter.setWorldMatrix(view);
     paintImage(painter, frameStart, false, curveOpacity, antialiasing, gradients);
-    exported.save(filePath);
+    return exported.save(filePath);
 }
 
-void Object::exportFlash(int startFrame, int endFrame, QMatrix view, QSize exportSize, QString filePath, int fps, int compression)
+bool Object::exportFlash(int startFrame, int endFrame, QMatrix view, QSize exportSize, QString filePath, int fps, int compression)
 {
     Q_UNUSED(exportSize);
     Q_UNUSED(startFrame);
@@ -723,6 +750,8 @@ void Object::exportFlash(int startFrame, int endFrame, QMatrix view, QSize expor
     // ************* Requires the MING Library ***************
     // Flash::exportFlash(this, startFrame, endFrame, view, exportSize, filePath, fps, compression);
     // **********************************************
+
+    return false;
 }
 
 void Object::imageCheck(int frameNumber)

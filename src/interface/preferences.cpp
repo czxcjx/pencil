@@ -13,7 +13,19 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 */
-#include <QtGui>
+
+#include <QListWidget>
+#include <QStackedWidget>
+#include <QButtonGroup>
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QRadioButton>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QLabel>
+#include <QPushButton>
 #include "preferences.h"
 #include "scribblearea.h"
 #include "shortcutspage.h"
@@ -60,6 +72,10 @@ Preferences::Preferences( QWidget* parent ) : QDialog(parent)
     setWindowTitle(tr("Preferences"));
 }
 
+Preferences::~Preferences()
+{
+}
+
 void Preferences::createIcons()
 {
     QListWidgetItem* generalButton = new QListWidgetItem(contentsWidget);
@@ -104,6 +120,12 @@ void Preferences::createIcons()
             SLOT(changePage(QListWidgetItem*, QListWidgetItem*)));
 }
 
+void Preferences::closeEvent(QCloseEvent *)
+{
+
+    this->deleteLater();
+}
+
 void Preferences::changePage(QListWidgetItem* current, QListWidgetItem* previous)
 {
     if (!current)
@@ -111,8 +133,6 @@ void Preferences::changePage(QListWidgetItem* current, QListWidgetItem* previous
 
     pagesWidget->setCurrentIndex(contentsWidget->row(current));
 }
-
-
 
 GeneralPage::GeneralPage(QWidget* parent) : QWidget(parent)
 {
@@ -315,12 +335,6 @@ GeneralPage::GeneralPage(QWidget* parent) : QWidget(parent)
     connect(curveSmoothingLevel, SIGNAL(valueChanged(int)), parent, SIGNAL(curveSmoothingChange(int)));
     connect(highResBox, SIGNAL(stateChanged(int)), parent, SIGNAL(highResPositionChange(int)));
 
-    /*lay->addWidget(fontSizeLabel);
-    lay->addWidget(fontSize);
-    lay->addWidget(frameSizeLabel);
-    lay->addWidget(frameSize);
-    lay->addWidget(lengthSizeLabel);
-    lay->addWidget(lengthSize);*/
     setLayout(lay);
 }
 
@@ -332,7 +346,7 @@ TimelinePage::TimelinePage(QWidget* parent) : QWidget(parent)
     QVBoxLayout* lay = new QVBoxLayout();
 
     QGroupBox* timeLineBox = new QGroupBox(tr("Timeline"));
-    QCheckBox* drawLabel = new QCheckBox(tr("Draw timeline labels"));    
+    QCheckBox* drawLabel = new QCheckBox(tr("Draw timeline labels"));
     QSpinBox* fontSize = new QSpinBox();
     QLabel* frameSizeLabel = new QLabel(tr("Frame size in Pixels"));
     QSpinBox* frameSize = new QSpinBox(this);
@@ -368,9 +382,6 @@ TimelinePage::TimelinePage(QWidget* parent) : QWidget(parent)
     connect(drawLabel, SIGNAL(stateChanged(int)), parent, SIGNAL(labelChange(int)));
     connect(scrubBox, SIGNAL(stateChanged(int)), parent, SIGNAL(scrubChange(int)));
 
-    //lay->addWidget(drawLabel);
-    //lay->addWidget(fontSizeLabel);
-    //lay->addWidget(fontSize);
     lay->addWidget(frameSizeLabel);
     lay->addWidget(frameSize);
     lay->addWidget(lengthSizeLabel);

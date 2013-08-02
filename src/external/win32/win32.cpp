@@ -71,7 +71,7 @@ void initialise()
 
 // added parameter exportFps -> frame rate of exported video
 // added parameter exportFormat -> to set ffmpeg parameters
-void Object::exportMovie(int startFrame, 
+bool Object::exportMovie(int startFrame,
                          int endFrame, 
                          QMatrix view, 
                          Layer* currentLayer, 
@@ -168,7 +168,7 @@ void Object::exportMovie(int startFrame,
                         audioDataValid = true;
                         int delta = fframe * 44100 * 2;
                         qDebug() << "audio delta " << delta;
-                        int indexMax = MIN(audioSize/2,audioDataSize/2-delta);
+                        int indexMax = MIN(audioSize/2, audioDataSize/2 - delta);
                         // audio files 'mixing': 'higher' sound layers overwrite 'lower' sound layers
                         for (int index = 0; index < indexMax; index++)
                         {audioData[index+delta] = safeSum(audioData[index+delta],data[index]);}
@@ -263,6 +263,8 @@ void Object::exportMovie(int startFrame,
         qDebug() << "Please place ffmpeg.exe in plugins directory";
     }
     qDebug() << "-----";
+
+    return true;
 }
 
 

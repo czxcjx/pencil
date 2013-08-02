@@ -12,7 +12,10 @@ class Palette;
 class DisplayOptionDockWidget;
 class ToolOptionDockWidget;
 class TimeLine;
+class ToolSetWidget;
 class Preferences;
+class RecentFileMenu;
+
 template<typename T> class QList;
 
 
@@ -31,10 +34,8 @@ public:
     explicit MainWindow2(QWidget* parent = 0);
     ~MainWindow2();
 
-    void addRecentFile(QString filePath);
-
     // Data Model
-    Object* object;
+    Object* m_object;
 
     // UI: central view
     Editor* editor;
@@ -47,9 +48,13 @@ public:
     DisplayOptionDockWidget* m_displayOptionWidget;
     ToolOptionDockWidget*    m_toolOptionWidget;
     TimeLine* m_pTimeLine;
+    ToolSetWidget* m_toolSet;
 
     // Other windows
     Preferences* m_pPreferences;
+
+protected:
+    RecentFileMenu *m_recentFileMenu;
 
 private:
     Ui::MainWindow2* ui;
@@ -62,40 +67,43 @@ public slots:
     void newDocument();
     void openDocument();
     bool saveAsNewDocument();
-    void saveForce();
+    void saveDocument();
     bool maybeSave();
+    void showPreferences();
+    bool openObject(QString strFilename);
+    void resetToolsSettings();
+    void openFile(QString filename);
 
 private slots:
     void exportFile();
-
     bool saveObject(QString strSavedFilename);
     void dockAllPalettes();
     void helpBox();
     void aboutPencil();
-    void showPreferences();
+
+    void loadAllShortcuts();
+    void unloadAllShortcuts();
 
     void importPalette();
     void exportPalette();
 
     // XML save/load
     QDomElement createDomElement(QDomDocument& doc);
+    bool loadDomElement(QDomElement element,  QString filePath);
 
 private:
     void arrangePalettes();
     void makePreferenceConnections();
     void makeTimeLineConnections();
     void createMenus();
-    void loadPlugins();    
     void addToMenu(QObject* plugin, const QString text, QMenu* menu, const char* member, QActionGroup* actionGroup = 0);
 
     void closeEvent(QCloseEvent*);
+
     void readSettings();
-    void writeSettings();
+    void writeSettings();    
 
     QString path;
-    QList<QMenu*>* m_pMenuList;
-
-    QMenu* openRecentMenu;
 };
 
 #endif // MAINWINDOW2_H

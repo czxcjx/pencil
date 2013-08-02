@@ -58,7 +58,7 @@ public:
     bool playing;
     bool looping;
     bool sound;
-    ToolSet* toolSet;
+    ToolSetWidget* toolSet;
 
     TimeLine* getTimeLine();
 
@@ -68,9 +68,8 @@ public:
     Layer* getCurrentLayer() { return getCurrentLayer(0); }
     Layer* getLayer(int i);
     bool isModified() { return modified; }
-    int allLayers() { return scribbleArea->allLayers(); }
-    static QMatrix map(QRectF, QRectF);
-    bool openObject(QString);
+    int allLayers() { return scribbleArea->showAllLayers(); }
+    static QMatrix map(QRectF, QRectF);    
     bool exportSeqCLI(QString, QString);
 
     int getOnionLayer1Opacity() {return onionLayer1Opacity;}
@@ -101,6 +100,8 @@ signals:
     void changeOutlinesButton(bool);
 
     // Tool Option
+    void changeTool(ToolType);
+
     void penWidthValueChange(qreal);
     void penFeatherValueChange(qreal);
     void penInvisiblityValueChange(int);
@@ -113,19 +114,9 @@ signals:
     void needSave();
 
 public slots:
-    //tools menu
-    void move_clicked();
-    void pencil_clicked();
-    void select_clicked();
-    void hand_clicked();
-    void eyedropper_clicked();
-    void clear_clicked();
-    void eraser_clicked();
-    void pen_clicked();
-    void polyline_clicked();
-    void bucket_clicked();
-    void color_clicked();
-    void smudge_clicked();
+    
+    void setTool(ToolType);     
+    void clearCurrentFrame();    
 
     void importImageSequence();
     void cut();
@@ -137,6 +128,7 @@ public slots:
     void rotatecw();
     void rotateacw();
     void gridview();
+    void resetView();
 
     void importImage();
     void importImage(QString filePath);
@@ -144,13 +136,18 @@ public slots:
     bool importMov();
     void updateFrame(int frameNumber);
     void updateFrameAndVector(int frameNumber);
+
     void scrubTo(int frameNumber);
+    void scrubNextKeyframe();
+    void scrubPreviousKeyframe();
     void scrubForward();
     void scrubBackward();
+
     void play();
     void startOrStop();
     void playNextFrame();
     void playPrevFrame();
+
     void changeFps(int);
     int getFps();
     void setLoop(bool checked);
@@ -232,7 +229,6 @@ public slots:
     void toggleShowAllLayers();
     void resetMirror();
 
-    void openRecent();
     void print();
     //void detachAllPalettes();
     void restorePalettesSettings(bool, bool, bool);
@@ -297,8 +293,7 @@ private:
     QComboBox* exportMovieDialog_format;
     QSlider* exportFlashDialog_compression;
 
-    // saving (XML)
-    bool loadDomElement(QDomElement element,  QString filePath);
+    // saving (XML)    
 };
 
 #endif

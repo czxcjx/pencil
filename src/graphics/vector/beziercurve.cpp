@@ -13,8 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 */
-#include <QtGui>
-#include <math.h>
+
+#include <cmath>
+#include <QList>
 #include "beziercurve.h"
 #include "object.h"
 
@@ -767,7 +768,7 @@ qreal BezierCurve::findDistance(BezierCurve curve, int i, QPointF P, QPointF& ne
 {
     //qDebug() << "---- INTER CUBIC SEGMENT";
     int nSteps = 24;
-    int k0;
+    int k0 = 0;
     QPointF Q;
     Q = curve.getVertex(i-1);
     qreal distMin = eLength(Q-P);

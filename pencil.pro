@@ -10,9 +10,6 @@ OBJECTS_DIR = .obj
 DEPENDPATH += . src
 INCLUDEPATH += . 	src \
             src/external/flash \
-            src/external/linux \
-            src/external/macosx \
-            src/external/win32 \
             src/graphics \
             src/graphics/bitmap \
             src/graphics/vector \
@@ -20,8 +17,20 @@ INCLUDEPATH += . 	src \
             src/structure \
             src/tool \
             src/util \
-            src/ui
+            src/ui \
+            3rdparty/zlib/include
             
+QT += xml \
+phonon \
+core \
+gui \
+xmlpatterns \
+svg
+
+include(3rdparty/quazip.pri)
+
+DEPENDPATH += ${INCLUDEPATH}
+
 # Input
 HEADERS +=  src/interfaces.h \
             src/graphics/bitmap/bitmapimage.h \
@@ -57,7 +66,6 @@ HEADERS +=  src/interfaces.h \
             src/tool/erasertool.h \
             src/tool/selecttool.h \
             src/tool/movetool.h \
-            src/tool/edittool.h \
             src/tool/handtool.h \
     src/tool/smudgetool.h \
     src/tool/polylinetool.h \
@@ -65,11 +73,19 @@ HEADERS +=  src/interfaces.h \
     src/tool/eyedroppertool.h \
     src/util/pencilsettings.h \
     src/interface/shortcutspage.h \
-    src/util/keyboardmanager.h \
     src/interface/mainwindow2.h \
     src/interface/timelinecells.h \
     src/graphics/vector/vectorselection.h \
-    src/util/pencildef.h
+    src/util/pencildef.h \
+    src/interface/keycapturelineedit.h \
+    src/structure/objectsaveloader.h \
+    src/tool/strokemanager.h \
+    src/tool/stroketool.h \
+    src/util/blitrect.h \
+    src/structure/keyframe.h \
+    src/structure/camera.h \
+    src/interface/recentfilemenu.h \
+    src/util/util.h
 
 SOURCES +=  src/graphics/bitmap/blur.cpp \
             src/graphics/bitmap/bitmapimage.cpp \
@@ -106,7 +122,6 @@ SOURCES +=  src/graphics/bitmap/blur.cpp \
             src/tool/erasertool.cpp \
             src/tool/selecttool.cpp \
             src/tool/movetool.cpp \
-            src/tool/edittool.cpp \
             src/tool/handtool.cpp \
     src/tool/smudgetool.cpp \
     src/tool/polylinetool.cpp \
@@ -114,42 +129,55 @@ SOURCES +=  src/graphics/bitmap/blur.cpp \
     src/tool/eyedroppertool.cpp \
     src/util/pencilsettings.cpp \
     src/interface/shortcutspage.cpp \
-    src/util/keyboardmanager.cpp \
     src/interface/mainwindow2.cpp \
     src/interface/timelinecells.cpp \
-    src/graphics/vector/vectorselection.cpp
+    src/graphics/vector/vectorselection.cpp \
+    src/interface/keycapturelineedit.cpp \
+    src/structure/objectsaveloader.cpp \
+    src/tool/strokemanager.cpp \
+    src/tool/stroketool.cpp \
+    src/util/blitrect.cpp \
+    src/structure/keyframe.cpp \
+    src/structure/camera.cpp \
+    src/interface/recentfilemenu.cpp \
+    src/util/util.cpp
+
+# Track dependencies for all includes
+DEPENDPATH *= $${INCLUDEPATH}
 
 win32 {
     INCLUDEPATH += . libwin32
     SOURCES += src/external/win32/win32.cpp
-        LIBS += -Llibwin32
+    INCLUDEPATH += src/external/win32
+    LIBS += -Llibwin32 -lzdll
     RC_FILE = pencil.rc
 }
 macx {
+    INCLUDEPATH +=  src/external/macosx
+    LIBS += -lobjc -framework AppKit -framework Carbon
     INCLUDEPATH += . libmacosx
     HEADERS += src/external/macosx/style.h
     SOURCES += src/external/macosx/macosx.cpp \
            src/external/macosx/style.cpp
     RC_FILE = pencil.icns
 }
-linux-g++ {
+linux-* {
     INCLUDEPATH += . liblinux /include
+    INCLUDEPATH += src/external/linux
     SOURCES += src/external/linux/linux.cpp
     LIBS += -Lliblinux -lming -lpng -lquazip -lz
 }
 RESOURCES += pencil.qrc
-QT += xml \
-phonon \
-core \
-gui \
-xmlpatterns \
-svg
 
 # shortcuts.path = %{buildDir}
 # shortcuts.files += %{sourceDir}/shortcuts.ini
 # INSTALLS += shortcuts
 
 FORMS += \
-    src/interface/mainwindow2.ui
+    src/interface/mainwindow2.ui \
+    src/interface/shortcutspage.ui
 
 TRANSLATIONS += pencil.ts
+
+
+

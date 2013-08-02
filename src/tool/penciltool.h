@@ -1,9 +1,9 @@
 #ifndef PENCILTOOL_H
 #define PENCILTOOL_H
 
-#include "basetool.h"
+#include "stroketool.h"
 
-class PencilTool : public BaseTool
+class PencilTool : public StrokeTool
 {
     Q_OBJECT
 public:
@@ -11,10 +11,22 @@ public:
     ToolType type();
     void loadSettings();
     QCursor cursor();
+
+    void mousePressEvent(QMouseEvent *);
+    void mouseMoveEvent(QMouseEvent *);
+    void mouseReleaseEvent(QMouseEvent *);
+
+    void drawStroke();
+
+    void adjustPressureSensitiveProperties(qreal pressure, bool mouseDevice);
+
 signals:
     
 public slots:
+
     
+protected:
+    QColor currentPressuredColor;
 };
 
 #endif // PENCILTOOL_H
